@@ -16,6 +16,27 @@ else:
     device = "cpu"
     dtype=torch.bfloat16
 
+print(f"Utilizing {device}")
+
+
+def embed_esm2(embed_dataloader, out_file):
+    model, _ = pretrained.load_model_and_alphabet("esm2_t33_650M_UR50D")
+    model.eval().to(device)
+    embed_h5 = h5py.File(out_file, "w")
+    print("HI")
+    try:
+        with torch.autocast(device_type=device,dtype=dtype):
+            with torch.no_grad():
+                for i, (toks, lengths, np_mask, labels) in tqdm.tqdm(enumerate(embed_dataloader)):
+                    embed = model(toks.to(device), repr_layers=[33])["representations"][33].float().cpu().numpy()
+                    for j in range(len(labels)):
+                        # removing start and end tokens
+                        embed_h5[labels[j]] = embed[j, 1:1+lengths[j]].astype(np.float16)
+        embed_h5.close()
+    except:
+        os.system(f"rm {out_file}")
+        raise Exception("Failed to create embeddings")
+
 def embed_esm1b(embed_dataloader, out_file):
     model, _ = pretrained.load_model_and_alphabet("esm1b_t33_650M_UR50S")
     model.eval().to(device)
@@ -34,8 +55,11 @@ def embed_esm1b(embed_dataloader, out_file):
         raise Exception("Failed to create embeddings")
     
 
-def embed_prott5(embed_dataloader, out_file):
-    model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
+def embed_prott5(embed_dataloader, out_file, half = False):
+    model_str = "Rostlab/prot_t5_xl_uniref50"
+    if half:
+        model_str = "Rostlab/prot_t5_xl_half_uniref50-enc"
+    model = T5EncoderModel.from_pretrained(model_str)
     model.eval().to(device)
     embed_h5 = h5py.File(out_file, "w")
     try:
@@ -61,9 +85,12 @@ def generate_embeddings(model_attrs: ModelAttributes):
     if model_attrs.model_type == FAST:
         embed_dataloader = torch.utils.data.DataLoader(embed_dataset, collate_fn=BatchConverter(model_attrs.alphabet), batch_sampler=embed_batches)
         embed_esm1b(embed_dataloader, EMBEDDINGS[model_attrs.model_type]["embeds"])
+    elif model_attrs.model_type == FAST2:
+        embed_dataloader = torch.utils.data.DataLoader(embed_dataset, collate_fn=BatchConverter(model_attrs.alphabet), batch_sampler=embed_batches)
+        embed_esm2(embed_dataloader, EMBEDDINGS[model_attrs.model_type]["embeds"])
     elif model_attrs.model_type == ACCURATE:
         embed_dataloader = torch.utils.data.DataLoader(embed_dataset, collate_fn=BatchConverterProtT5(model_attrs.alphabet), batch_sampler=embed_batches)
-        embed_prott5(embed_dataloader, EMBEDDINGS[model_attrs.model_type]["embeds"])
+        embed_prott5(embed_dataloader, EMBEDDINGS[model_attrs.model_type]["embeds"], half=model_attrs.half)
     else:
         raise Exception("wrong model type provided expected Fast,Accurate got", model_attrs.model_type)
     

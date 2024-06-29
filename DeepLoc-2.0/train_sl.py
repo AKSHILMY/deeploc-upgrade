@@ -53,13 +53,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "-m","--model", 
         default="Fast",
-        choices=['Accurate', 'Fast'],
+        choices=['Accurate', 'Fast','Fast2'],
         type=str,
         help="Model to use."
     )
+    parser.add_argument(
+        "-h", "--half", 
+        default=False,
+        choices=[False,True],
+        type=bool,
+        help="Use half precision or not"
+    )
+
     args = parser.parse_args()
 
-    model_attrs = get_train_model_attributes(model_type=args.model)
+    model_attrs = get_train_model_attributes(model_type=args.model,half=args.half)
     if not os.path.exists(model_attrs.embedding_file):
         print("Embeddings not found, generating......")
         generate_embeddings(model_attrs)

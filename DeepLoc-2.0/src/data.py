@@ -131,13 +131,13 @@ def read_fasta(fastafile):
 
 import h5py
 import numpy as np
-import pickle5
+import pickle
 from sklearn.model_selection import ShuffleSplit
 from src.constants import *
 
 def get_swissprot_df(clip_len):  
     with open(SIGNAL_DATA, "rb") as f:
-        annot_df = pickle5.load(f)
+        annot_df = pickle.load(f)
     nes_exclude_list = ['Q7TPV4','P47973','P38398','P38861','Q16665','O15392','Q9Y8G3','O14746','P13350','Q06142']
     swissprot_exclusion_list = ['Q04656-5','O43157','Q9UPN3-2']
     def clip_middle_np(x):
@@ -175,7 +175,7 @@ def convert_to_binary(x):
 
 def get_swissprot_ss_Xy(save_path, fold, clip_len):
     with open(SIGNAL_DATA, "rb") as f:
-        annot_df = pickle5.load(f)
+        annot_df = pickle.load(f)
     nes_exclude_list = ['Q7TPV4','P47973','P38398','P38861','Q16665','O15392','Q9Y8G3','O14746','P13350','Q06142']
     swissprot_exclusion_list = ['Q04656-5','O43157','Q9UPN3-2']
     def clip_middle_np(x):
@@ -287,6 +287,10 @@ class TrainBatchConverter(object):
         targets = torch.zeros((batch_size, 11), dtype=torch.float32)
         for i, (seq_str, embedding, target, target_annot, label) in enumerate(raw_batch):
             #seq_str = seq_str[1:]
+            a=len(embedding)
+            b=len(seq_str)
+            if a!=b:
+                pass
             labels.append(label)
             lengths.append(len(seq_str))
             strs.append(seq_str)
