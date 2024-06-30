@@ -1,0 +1,11 @@
+Location,DeepLoc 1.0,ESM1b(default),ESM1b(custom),ProT5,ESM2(default),ESM2(custom)
+cytoplasm,0.45,0.61,0.6,0.62,0.62,0.62
+Nucleous,0.46,0.66,0.65,0.69,0.65,0.65
+Extracellular,0.78,0.85,0.85,0.85,0.86,0.85
+Cellmembrane,0.53,0.64,0.63,0.66,0.64,0.63
+Mitonchondrion,0.58,0.73,0.73,0.76,0.73,0.74
+plastid,0.69,0.88,0.9,0.9,0.9,0.88
+EPR,0.32,0.52,0.5,0.56,0.5,0.53
+lysome,0.06,0.24,0.22,0.28,0.22,0.29
+golgi aparatus,0.2,0.36,0.35,0.34,0.36,0.33
+peroxisome,0.15,0.48,0.46,0.56,0.46,0.56
